@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.customer_service.customer_service_app"
+    namespace = "com.supmart.supmart_shop"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
