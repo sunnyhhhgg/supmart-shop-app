@@ -109,15 +109,16 @@ class ProfileScreen extends StatelessWidget {
   }
 
   Widget _buildGridSection(BuildContext context, AuthProvider auth, ThemeData theme) {
-    final items = [
+    final row1 = [
       _GridItem('我的订单', Icons.receipt_long, theme.colorScheme.primary, () {
-        // 回到首页（HomeScreen在导航栈中）
         Navigator.popUntil(context, (route) => route.isFirst);
       }),
       _GridItem('我的钱包', Icons.account_balance_wallet, Colors.green, () => _toPage(context, WalletScreen(
         key: ValueKey('wallet_${DateTime.now().millisecondsSinceEpoch}'),
       ))),
       _GridItem('API密钥', Icons.vpn_key, Colors.blue, () => _toPage(context, const SecretKeyScreen())),
+    ];
+    final row2 = [
       _GridItem('分站管理', Icons.dns, Colors.purple, () => _toPage(context, const SubstationScreen())),
       _GridItem('系统公告', Icons.campaign, Colors.teal, () => _toPage(context, const AnnouncementsScreen())),
       _GridItem('账号设置', Icons.settings, Colors.blueGrey, () => _toPage(context, const SettingsScreen())),
@@ -133,21 +134,18 @@ class ProfileScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('我的服务', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+          const Text('我的服务', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white)),
           const SizedBox(height: 16),
-          Wrap(
-            spacing: 0,
-            runSpacing: 16,
-            children: items.map((item) {
-              return SizedBox(
-                width: (MediaQuery.of(context).size.width - 64) / 4,
+          Row(
+            children: row1.map((item) {
+              return Expanded(
                 child: GestureDetector(
                   onTap: item.onTap,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Container(
-                        width: 44, height: 44,
+                        width: 46, height: 46,
                         decoration: BoxDecoration(
                           color: item.color.withOpacity(0.12),
                           borderRadius: BorderRadius.circular(12),
@@ -155,7 +153,35 @@ class ProfileScreen extends StatelessWidget {
                         child: Icon(item.icon, color: item.color, size: 22),
                       ),
                       const SizedBox(height: 6),
-                      Text(item.label, style: TextStyle(fontSize: 11, color: Colors.grey[300]),
+                      Text(item.label,
+                        style: TextStyle(fontSize: 11, color: Colors.grey[300]),
+                        textAlign: TextAlign.center, maxLines: 1, overflow: TextOverflow.ellipsis),
+                    ],
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: row2.map((item) {
+              return Expanded(
+                child: GestureDetector(
+                  onTap: item.onTap,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 46, height: 46,
+                        decoration: BoxDecoration(
+                          color: item.color.withOpacity(0.12),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(item.icon, color: item.color, size: 22),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(item.label,
+                        style: TextStyle(fontSize: 11, color: Colors.grey[300]),
                         textAlign: TextAlign.center, maxLines: 1, overflow: TextOverflow.ellipsis),
                     ],
                   ),

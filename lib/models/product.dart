@@ -1,4 +1,5 @@
 import 'dart:convert';
+import '../services/config_service.dart';
 
 /// 商品购买参数项 — 与PC端 buy_params 结构一致
 class BuyParam {
@@ -143,11 +144,20 @@ class Product {
     return '';
   }
 
+  static String _absImage(String url) {
+    if (url.isEmpty) return '';
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    // 相对路径，拼接服务器地址
+    final base = ConfigService.baseUrl;
+    if (url.startsWith('/')) return '$base$url';
+    return '$base/$url';
+  }
+
   static List<String> _parseImageUrls(Map<String, dynamic> json) {
     // 优先使用 image_urls 数组
     final urls = json['image_urls'];
     if (urls is List && urls.isNotEmpty) {
-      return urls.map((e) => e.toString()).where((s) => s.isNotEmpty).toList();
+      return urls.map((e) => _absImage(e.toString())).where((s) => s.isNotEmpty).toList();
     }
     // 其次是 image 字段（可能包含JSON数组字符串或单个URL）
     final img = json['image'] ?? '';
@@ -155,10 +165,10 @@ class Product {
       if (img.startsWith('[')) {
         try {
           final list = jsonDecode(img) as List;
-          return list.map((e) => e.toString()).where((s) => s.isNotEmpty).toList();
+          return list.map((e) => _absImage(e.toString())).where((s) => s.isNotEmpty).toList();
         } catch (_) {}
       }
-      if (img.isNotEmpty) return [img];
+      if (img.isNotEmpty) return [_absImage(img)];
     }
     return [];
   }

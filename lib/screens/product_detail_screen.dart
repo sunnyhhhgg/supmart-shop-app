@@ -264,10 +264,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     if (imageUrls.isEmpty) {
       return Container(
         width: double.infinity,
-        height: 300,
+        height: 280,
         color: const Color(0xFF151515),
         child: Center(
-          child: Icon(Icons.image_outlined, size: 64, color: _primaryColor.withOpacity(0.2)),
+          child: Icon(Icons.image_outlined, size: 56, color: _primaryColor.withOpacity(0.15)),
         ),
       );
     }
@@ -277,11 +277,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       child: Column(
         children: [
           SizedBox(
-            height: 300,
+            height: 280,
             child: PageView.builder(
               itemCount: imageUrls.length,
               itemBuilder: (_, i) => Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 6),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8),
                   child: Image.network(
@@ -730,12 +730,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   Widget _buildQuantitySection() {
     final step = _step;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Divider(color: Colors.white10, height: 1),
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
           Text('购买数量', style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 13)),
           const SizedBox(height: 8),
           Row(
@@ -743,19 +743,19 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               Container(
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.06),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(10),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     _qtyBtn(Icons.remove, _decrement),
                     SizedBox(
-                      width: 56,
+                      width: 50,
                       child: TextField(
                         controller: TextEditingController(text: '$_quantity'),
                         keyboardType: TextInputType.number,
                         textAlign: TextAlign.center,
-                        style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
+                        style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w600),
                         decoration: const InputDecoration(
                           border: InputBorder.none,
                           contentPadding: EdgeInsets.zero,
@@ -778,11 +778,27 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               ),
               if (_maxQty > 0 && _maxQty < 999) ...[
                 const SizedBox(width: 8),
-                Text('限购 $_maxQty', style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 12)),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text('限$_maxQty',
+                    style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 11)),
+                ),
               ],
               if (step > 1) ...[
-                const SizedBox(width: 8),
-                Text('倍数 $step', style: TextStyle(color: _primaryColor.withOpacity(0.7), fontSize: 12)),
+                const SizedBox(width: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: _primaryColor.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text('×$step',
+                    style: TextStyle(color: _primaryColor.withOpacity(0.7), fontSize: 11, fontWeight: FontWeight.w600)),
+                ),
               ],
             ],
           ),
@@ -806,10 +822,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     final p = _product;
     final total = p.displayPrice * _quantity;
     final auth = context.watch<AuthProvider>();
-    final isLoggedIn = auth.isLoggedIn;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
       decoration: BoxDecoration(
         color: const Color(0xFF0F0F0F),
         border: Border(top: BorderSide(color: Colors.white.withOpacity(0.06))),
@@ -822,15 +837,16 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('合计', style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12)),
+                  Text('合计', style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 11)),
+                  const SizedBox(height: 2),
                   Text('¥${total.toStringAsFixed(7).replaceAll(RegExp(r'\.?0+$'), '')}',
                     style: TextStyle(color: _primaryColor, fontSize: 22, fontWeight: FontWeight.bold)),
                 ],
               ),
             ),
             SizedBox(
-              width: 160,
-              height: 48,
+              width: 156,
+              height: 46,
               child: ElevatedButton(
                 onPressed: _isBuying || _product.isOpen == false ? null : _buy,
                 style: ElevatedButton.styleFrom(
@@ -843,8 +859,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 child: _isBuying
                     ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                     : Text(
-                        _product.isOpen ? '立即购买' : '商品已下架',
-                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.white),
+                        _product.isOpen ? '立即购买' : '已下架',
+                        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.white),
                       ),
               ),
             ),

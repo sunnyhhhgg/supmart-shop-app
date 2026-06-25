@@ -290,7 +290,7 @@ class _ShopTabState extends State<_ShopTab> {
                         crossAxisCount: 2,
                         mainAxisSpacing: 10,
                         crossAxisSpacing: 10,
-                        childAspectRatio: 0.68,
+                        childAspectRatio: 0.72,
                       ),
                       delegate: SliverChildBuilderDelegate(
                         (_, i) => _buildProductCard(provider.products[i], primaryColor),
@@ -308,7 +308,7 @@ class _ShopTabState extends State<_ShopTab> {
 
   Widget _buildSearchBar(Color primaryColor) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(12, 10, 12, 6),
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
       color: const Color(0xFF0F0F0F),
       child: TextField(
         controller: _searchCtrl,
@@ -327,10 +327,10 @@ class _ShopTabState extends State<_ShopTab> {
                 )
               : null,
           filled: true,
-          fillColor: Colors.white.withOpacity(0.06),
+          fillColor: Colors.white.withOpacity(0.05),
           contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(22),
             borderSide: BorderSide.none,
           ),
         ),
@@ -343,15 +343,15 @@ class _ShopTabState extends State<_ShopTab> {
 
   Widget _buildBannerCarousel(Color primaryColor) {
     return Container(
-      height: 160,
-      padding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
+      height: 170,
+      padding: const EdgeInsets.fromLTRB(12, 6, 12, 8),
       child: PageView.builder(
         itemCount: _banners.length,
         onPageChanged: (_) => setState(() {}),
         itemBuilder: (_, i) {
           final b = _banners[i];
           return Container(
-            margin: const EdgeInsets.symmetric(horizontal: 4),
+            margin: const EdgeInsets.symmetric(horizontal: 3),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
               color: primaryColor.withOpacity(0.1),
@@ -451,16 +451,17 @@ class _ShopTabState extends State<_ShopTab> {
       child: Container(
         decoration: BoxDecoration(
           color: const Color(0xFF151515),
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(12),
           border: Border.all(color: Colors.white.withOpacity(0.04)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              flex: 3,
+            // 图片区域 — 固定宽比，防止变形
+            AspectRatio(
+              aspectRatio: 1 / 1,
               child: ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
                 child: product.image.isNotEmpty
                     ? Image.network(product.image, fit: BoxFit.cover, width: double.infinity,
                         errorBuilder: (_, __, ___) => _buildPlaceholder(product.name, primaryColor),
@@ -472,39 +473,45 @@ class _ShopTabState extends State<_ShopTab> {
                     : _buildPlaceholder(product.name, primaryColor),
               ),
             ),
-            Expanded(
-              flex: 2,
-              child: Padding(
-                padding: const EdgeInsets.all(10),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(product.name, style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w500),
-                      maxLines: 2, overflow: TextOverflow.ellipsis),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text('¥${product.priceText}',
-                            style: TextStyle(color: primaryColor, fontSize: 16, fontWeight: FontWeight.bold)),
+            // 信息区域
+            Padding(
+              padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(product.name,
+                    style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w500),
+                    maxLines: 1, overflow: TextOverflow.ellipsis),
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text('¥${product.priceText}',
+                          style: TextStyle(color: primaryColor, fontSize: 17, fontWeight: FontWeight.bold)),
+                      ),
+                      if (product.commissionRate != null && product.commissionRate! > 0)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: primaryColor.withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text('${product.commissionRate!.toStringAsFixed(1)}%',
+                            style: TextStyle(color: primaryColor, fontSize: 10, fontWeight: FontWeight.w600)),
                         ),
-                        if (product.commissionRate != null && product.commissionRate! > 0)
-                          Text('返佣 ${product.commissionRate!.toStringAsFixed(1)}%',
-                            style: TextStyle(color: primaryColor.withOpacity(0.7), fontSize: 10, fontWeight: FontWeight.w500)),
-                      ],
-                    ),
-                    const Spacer(),
-                    Row(
-                      children: [
-                        Text('库存: ${product.stock == -1 ? "充足" : product.stock}',
-                          style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 10)),
-                        const Spacer(),
-                        Text('${product.minBuy}-${product.maxBuy}',
-                          style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 10)),
-                      ],
-                    ),
-                  ],
-                ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      Text('库存: ${product.stock == -1 ? "充足" : product.stock}',
+                        style: TextStyle(color: Colors.white.withOpacity(0.35), fontSize: 10)),
+                      const Spacer(),
+                      if (product.maxBuy > 0 && product.maxBuy < 9999)
+                        Text('限${product.maxBuy}', style: TextStyle(color: Colors.white.withOpacity(0.35), fontSize: 10)),
+                    ],
+                  ),
+                ],
               ),
             ),
           ],
