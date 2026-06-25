@@ -463,7 +463,12 @@ class _ShopTabState extends State<_ShopTab> {
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
                 child: product.image.isNotEmpty
                     ? Image.network(product.image, fit: BoxFit.cover, width: double.infinity,
-                        errorBuilder: (_, __, ___) => _buildPlaceholder(product.name, primaryColor))
+                        errorBuilder: (_, __, ___) => _buildPlaceholder(product.name, primaryColor),
+                        loadingBuilder: (_, child, progress) {
+                          if (progress == null) return child;
+                          return Center(child: CircularProgressIndicator(strokeWidth: 2, color: primaryColor));
+                        },
+                      )
                     : _buildPlaceholder(product.name, primaryColor),
               ),
             ),
@@ -476,17 +481,26 @@ class _ShopTabState extends State<_ShopTab> {
                   children: [
                     Text(product.name, style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w500),
                       maxLines: 2, overflow: TextOverflow.ellipsis),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text('¥${product.priceText}',
+                            style: TextStyle(color: primaryColor, fontSize: 16, fontWeight: FontWeight.bold)),
+                        ),
+                        if (product.commissionRate != null && product.commissionRate! > 0)
+                          Text('返佣 ${product.commissionRate!.toStringAsFixed(1)}%',
+                            style: TextStyle(color: primaryColor.withOpacity(0.7), fontSize: 10, fontWeight: FontWeight.w500)),
+                      ],
+                    ),
                     const Spacer(),
                     Row(
                       children: [
-                        Text('¥${product.price.toStringAsFixed(2)}',
-                          style: TextStyle(color: primaryColor, fontSize: 16, fontWeight: FontWeight.bold)),
-                        if (product.originalPrice != null && product.originalPrice! > product.price)
-                          Padding(
-                            padding: const EdgeInsets.only(left: 6),
-                            child: Text('¥${product.originalPrice!.toStringAsFixed(2)}',
-                              style: TextStyle(color: Colors.white.withOpacity(0.3), fontSize: 11, decoration: TextDecoration.lineThrough)),
-                          ),
+                        Text('库存: ${product.stock == -1 ? "充足" : product.stock}',
+                          style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 10)),
+                        const Spacer(),
+                        Text('${product.minBuy}-${product.maxBuy}',
+                          style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 10)),
                       ],
                     ),
                   ],
