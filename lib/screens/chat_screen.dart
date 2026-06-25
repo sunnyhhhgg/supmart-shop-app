@@ -268,14 +268,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       bottomRight: isUser ? const Radius.circular(4) : const Radius.circular(16),
                     ),
                   ),
-                  child: Text(
-                    content,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: isUser ? Colors.white : Colors.white.withOpacity(0.9),
-                      height: 1.4,
-                    ),
-                  ),
+                  child: _buildMessageContent(msg, content),
                 ),
               ],
             ),
@@ -328,6 +321,48 @@ class _ChatScreenState extends State<ChatScreen> {
         ],
       ),
     );
+  }
+
+  Widget _buildMessageContent(Map<String, dynamic> msg, String content) {
+    final msgType = msg['msg_type']?.toString() ?? 'text';
+    // 图片消息
+    if (msgType == 'image') {
+      // 从内容中提取图片URL（格式: [图片]/uploads/xxx.jpg 或直接路径）
+      String imgUrl = content;
+      if (imgUrl.startsWith('[图片]')) { imgUrl = imgUrl.replaceFirst('[图片]', ''); }
+      if (imgUrl.startsWith('[图片]')) { imgUrl = imgUrl.replaceFirst('[图片]', ''); }
+      if (imgUrl.startsWith('[')) {
+        final start = imgUrl.indexOf(']');
+        if (start >= 0) imgUrl = imgUrl.substring(start + 1);
+      }
+      // 补全域名
+      final base = 'http://3003.online';
+      if (!imgUrl.startsWith('http://') && !imgUrl.startsWith('https://')) {
+        if (imgUrl.startsWith('/')) { imgUrl = '$base$imgUrl'; }
+        else { imgUrl = '$base/$imgUrl'; }
+      }
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: Image.network(
+          imgUrl,
+          fit: BoxFit.contain,
+          width: 200,
+          height: 200,
+          errorBuilder: (_, __, ___) => Text(content,
+            style: const TextStyle(fontSize: 14, color: Colors.white70, height: 1.4)),
+          loadingBuilder: (_, child, progress) {
+            if (progress == null) return child;
+            return const SizedBox(
+              width: 80, height: 80,
+              child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+            );
+          },
+        ),
+      );
+    }
+    // 文本消息
+    return Text(content,
+      style: const TextStyle(fontSize: 14, color: Colors.white, height: 1.4));
   }
 
   Widget _dot(int delay) {
