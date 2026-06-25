@@ -1,0 +1,28 @@
+# Flutter build artifacts
+build/
+*.apk
+*.aab
+*.ipa
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Flutter pub
+.pub-cache/
+.packages
+.pub/
+pubspec.lock
+
+# Dart
+.dart_tool/
+
+# Gradle
+android/.gradle/
+android/local.properties
+android/app/build/
