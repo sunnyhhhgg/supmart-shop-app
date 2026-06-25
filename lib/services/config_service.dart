@@ -4,7 +4,7 @@ import '../models/app_pack_config.dart';
 
 /// 启动时加载APP动态配置
 class ConfigService {
-  static const String _defaultHost = 'https://3003.online';
+  static const String _defaultHost = 'http://3003.online';
   static const String _openApiPath = '/openapi/app-pack/config/0';
 
   static AppPackConfig? _config;
