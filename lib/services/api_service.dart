@@ -1,12 +1,11 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:crypto/crypto.dart';
 import '../models/product.dart';
 import '../models/category.dart';
 import '../models/order.dart';
 import 'config_service.dart';
 
-/// SUPMART 开放API调用层
+/// SUPMART Shop API调用层
 class ApiService {
   static String? _token;
 
@@ -20,7 +19,6 @@ class ApiService {
 
   static bool get isLoggedIn => _token != null && _token!.isNotEmpty;
 
-  /// 通用请求头
   static Map<String, String> _headers() {
     final h = <String, String>{
       'Content-Type': 'application/json',
@@ -31,23 +29,18 @@ class ApiService {
     return h;
   }
 
-  /// API基础地址
   static String get _base => ConfigService.apiBase;
 
   // ==================== 登录 ====================
 
-  /// 用户登录
+  /// 用户登录 (POST /api/v2/shop/login)
   static Future<Map<String, dynamic>> login(String username, String password) async {
-    final ts = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-    final sign = md5.convert(utf8.encode('$username$password$ts')).toString();
     final resp = await http.post(
-      Uri.parse('$_base/openapi/customer/Login'),
+      Uri.parse('$_base/shop/login'),
       headers: _headers(),
       body: jsonEncode({
         'username': username,
         'password': password,
-        'timestamp': ts,
-        'sign': sign,
       }),
     ).timeout(const Duration(seconds: 15));
     return jsonDecode(resp.body);
@@ -55,10 +48,10 @@ class ApiService {
 
   // ==================== 商品 ====================
 
-  /// 获取商品分类
+  /// 获取商品分类 (POST /api/v2/shop/categories)
   static Future<List<Category>> getCategories() async {
-    final resp = await http.get(
-      Uri.parse('$_base/openapi/customer/Goods/CategoryList'),
+    final resp = await http.post(
+      Uri.parse('$_base/shop/categories'),
       headers: _headers(),
     ).timeout(const Duration(seconds: 15));
     final json = jsonDecode(resp.body);
@@ -69,32 +62,32 @@ class ApiService {
     return [];
   }
 
-  /// 获取商品列表
+  /// 获取商品列表 (POST /api/v2/shop/goods-list)
   static Future<List<Product>> getProducts({int? categoryId, String? keyword, int page = 1, int pageSize = 50}) async {
     final body = <String, dynamic>{
       'page': page,
-      'page_size': pageSize,
+      'list_rows': pageSize,
     };
-    if (categoryId != null && categoryId > 0) body['category_id'] = categoryId;
-    if (keyword != null && keyword.isNotEmpty) body['keyword'] = keyword;
+    if (categoryId != null && categoryId > 0) body['goods_category_id'] = categoryId;
+    if (keyword != null && keyword.isNotEmpty) body['goods_name'] = keyword;
 
     final resp = await http.post(
-      Uri.parse('$_base/openapi/customer/Goods/List'),
+      Uri.parse('$_base/shop/goods-list'),
       headers: _headers(),
       body: jsonEncode(body),
     ).timeout(const Duration(seconds: 15));
     final json = jsonDecode(resp.body);
     if (json['code'] == 0 && json['data'] != null) {
-      final list = json['data'] is List ? json['data'] as List : (json['data']['list'] ?? []) as List;
-      return list.map((e) => Product.fromJson(e)).toList();
+      final list = json['data']['list'] ?? json['data'] as List;
+      return (list as List).map((e) => Product.fromJson(e)).toList();
     }
     return [];
   }
 
-  /// 商品详情
+  /// 商品详情 (POST /api/v2/shop/goods-detail)
   static Future<Product?> getProductDetail(int productId) async {
     final resp = await http.post(
-      Uri.parse('$_base/openapi/customer/Goods/Show'),
+      Uri.parse('$_base/shop/goods-detail'),
       headers: _headers(),
       body: jsonEncode({'id': productId}),
     ).timeout(const Duration(seconds: 15));
@@ -107,7 +100,7 @@ class ApiService {
 
   // ==================== 下单 ====================
 
-  /// 提交订单
+  /// 提交订单 (POST /api/v2/shop/buy)
   static Future<Map<String, dynamic>> placeOrder({
     required int productId,
     required int quantity,
@@ -122,7 +115,7 @@ class ApiService {
     if (buyer != null) body['buyer'] = buyer;
 
     final resp = await http.post(
-      Uri.parse('$_base/openapi/customer/Goods/Buy'),
+      Uri.parse('$_base/shop/buy'),
       headers: _headers(),
       body: jsonEncode(body),
     ).timeout(const Duration(seconds: 30));
@@ -131,47 +124,52 @@ class ApiService {
 
   // ==================== 订单 ====================
 
-  /// 获取订单列表
+  /// 获取订单列表 (POST /api/v2/shop/order-paging)
   static Future<List<Order>> getOrders({String? status, int page = 1, int pageSize = 20}) async {
     final body = <String, dynamic>{
       'page': page,
-      'page_size': pageSize,
+      'list_rows': pageSize,
     };
-    if (status != null) body['status'] = status;
+    if (status != null && status.isNotEmpty) {
+      body['status'] = int.tryParse(status) ?? 0;
+    }
 
     final resp = await http.post(
-      Uri.parse('$_base/openapi/customer/Order/List'),
+      Uri.parse('$_base/shop/order-paging'),
       headers: _headers(),
       body: jsonEncode(body),
     ).timeout(const Duration(seconds: 15));
     final json = jsonDecode(resp.body);
     if (json['code'] == 0 && json['data'] != null) {
-      final list = json['data'] is List ? json['data'] as List : (json['data']['list'] ?? []) as List;
-      return list.map((e) => Order.fromJson(e)).toList();
+      final list = json['data']['list'] ?? json['data'] as List;
+      return (list as List).map((e) => Order.fromJson(e)).toList();
     }
     return [];
   }
 
-  /// 订单详情
+  /// 订单详情 (POST /api/v2/shop/order-paging with order_id)
   static Future<Order?> getOrderDetail(String orderNo) async {
     final resp = await http.post(
-      Uri.parse('$_base/openapi/customer/Order/Show'),
+      Uri.parse('$_base/shop/order-paging'),
       headers: _headers(),
-      body: jsonEncode({'order_no': orderNo}),
+      body: jsonEncode({'order_no': orderNo, 'page': 1, 'list_rows': 1}),
     ).timeout(const Duration(seconds: 15));
     final json = jsonDecode(resp.body);
     if (json['code'] == 0 && json['data'] != null) {
-      return Order.fromJson(json['data']);
+      final list = json['data']['list'] ?? json['data'] as List;
+      if ((list as List).isNotEmpty) {
+        return Order.fromJson(list[0]);
+      }
     }
     return null;
   }
 
   // ==================== 账户 ====================
 
-  /// 获取账户余额
+  /// 获取账户余额 (POST /api/v2/shop/profile)
   static Future<double> getBalance() async {
-    final resp = await http.get(
-      Uri.parse('$_base/openapi/customer/CustomerAccount/Show'),
+    final resp = await http.post(
+      Uri.parse('$_base/shop/profile'),
       headers: _headers(),
     ).timeout(const Duration(seconds: 15));
     final json = jsonDecode(resp.body);
