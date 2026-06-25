@@ -23,6 +23,7 @@ class ApiService {
     _token = null;
   }
 
+  static String? get token => _token;
   static bool get isLoggedIn => _token != null && _token!.isNotEmpty;
 
   static Map<String, String> _headers() {
@@ -386,7 +387,11 @@ class ApiService {
       headers: _headers(),
       body: jsonEncode({'amount': amount, 'account': account}),
     ).timeout(_timeout);
-    return jsonDecode(resp.body);
+    final json = jsonDecode(resp.body);
+    if (json['code'] != 0) {
+      throw Exception(json['message'] ?? '提现失败');
+    }
+    return json;
   }
 
   /// 创建支付订单 (POST /api/v2/shop/create-payment)
@@ -612,8 +617,7 @@ class ApiService {
 
   // ==================== 在线客服 ====================
 
-  /// 发送消息并获取自动回复 (POST /api/v2/admin/cs/auto-reply)
-  /// shop_token 也可调用此admin接口
+  /// 发送消息并获取自动回复 (POST /api/v2/shop/cs/auto-reply)
   static Future<Map<String, dynamic>> sendChatMessage({
     required String content,
     int convId = 0,
@@ -622,7 +626,7 @@ class ApiService {
     String msgType = 'text',
   }) async {
     final resp = await http.post(
-      Uri.parse('$_base/admin/cs/auto-reply'),
+      Uri.parse('$_base/shop/cs/auto-reply'),
       headers: _headers(),
       body: jsonEncode({
         'conv_id': convId,
@@ -635,10 +639,10 @@ class ApiService {
     return jsonDecode(resp.body);
   }
 
-  /// 获取聊天消息列表 (GET /api/v2/admin/cs/messages?conv_id=X)
+  /// 获取聊天消息列表 (GET /api/v2/shop/cs/messages?conv_id=X)
   static Future<List<Map<String, dynamic>>> getChatMessages(int convId) async {
     final resp = await http.get(
-      Uri.parse('$_base/admin/cs/messages?conv_id=$convId'),
+      Uri.parse('$_base/shop/cs/messages?conv_id=$convId'),
       headers: _headers(),
     ).timeout(_timeout);
     final json = jsonDecode(resp.body);

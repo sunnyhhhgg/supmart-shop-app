@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'settings_screen.dart';
 import 'secret_key_screen.dart';
-import 'close_price_screen.dart';
 import 'substation_screen.dart';
 import 'announcements_screen.dart';
 import 'wallet_screen.dart';
@@ -118,7 +117,6 @@ class ProfileScreen extends StatelessWidget {
       _GridItem('我的钱包', Icons.account_balance_wallet, Colors.green, () => _toPage(context, WalletScreen(
         key: ValueKey('wallet_${DateTime.now().millisecondsSinceEpoch}'),
       ))),
-      _GridItem('成交价', Icons.price_change, Colors.orange, () => _toPage(context, const ClosePriceScreen())),
       _GridItem('API密钥', Icons.vpn_key, Colors.blue, () => _toPage(context, const SecretKeyScreen())),
       _GridItem('分站管理', Icons.dns, Colors.purple, () => _toPage(context, const SubstationScreen())),
       _GridItem('系统公告', Icons.campaign, Colors.teal, () => _toPage(context, const AnnouncementsScreen())),
@@ -238,7 +236,7 @@ class ProfileScreen extends StatelessWidget {
       child: Column(
         children: [
           _menuItem(context, Icons.headset_mic, '在线客服', Colors.blue, () {
-            _toPage(context, const ChatScreen());
+            _toPage(context, ChatScreen(userName: auth.username));
           }),
           const Divider(height: 1, indent: 52, color: Colors.white10),
           _menuItem(context, Icons.info_outline, '关于', Colors.grey, () => _showAbout(context)),

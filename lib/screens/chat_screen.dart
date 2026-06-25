@@ -26,10 +26,22 @@ class _ChatScreenState extends State<ChatScreen> {
   int _convId = 0;
   Timer? _pollTimer;
   int _lastMsgCount = 0;
+  int _extractedUserId = 0;
 
   @override
   void initState() {
     super.initState();
+    // 如果 userId 为 0，尝试从 token 中提取
+    if (widget.userId == 0) {
+      final token = ApiService.token ?? '';
+      final regex = RegExp(r'shop_c(\d+)_');
+      final match = regex.firstMatch(token);
+      if (match != null) {
+        final id = int.tryParse(match.group(1) ?? '0') ?? 0;
+        // 通过 setState 间接更新 widget.userId 不可行，暂记录
+        _extractedUserId = id;
+      }
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) => _startPolling());
   }
 
@@ -68,10 +80,11 @@ class _ChatScreenState extends State<ChatScreen> {
     setState(() => _sending = true);
 
     try {
+      final effectiveUserId = widget.userId > 0 ? widget.userId : _extractedUserId;
       final result = await ApiService.sendChatMessage(
         content: content,
         convId: _convId,
-        userId: widget.userId,
+        userId: effectiveUserId,
         userName: widget.userName,
       );
       if (result['code'] == 0) {
