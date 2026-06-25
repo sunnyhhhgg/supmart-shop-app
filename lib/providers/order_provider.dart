@@ -8,13 +8,13 @@ class OrderProvider extends ChangeNotifier {
   String? _error;
   int _page = 1;
   bool _hasMore = true;
-  String _statusFilter = '';
+  int? _statusFilter;
 
   List<Order> get orders => _orders;
   bool get isLoading => _isLoading;
   String? get error => _error;
   bool get hasMore => _hasMore;
-  String get statusFilter => _statusFilter;
+  int? get statusFilter => _statusFilter;
 
   /// 加载订单
   Future<void> loadOrders({bool refresh = false}) async {
@@ -30,10 +30,11 @@ class OrderProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final list = await ApiService.getOrders(
-        status: _statusFilter.isEmpty ? null : _statusFilter,
+      final result = await ApiService.getOrders(
+        status: _statusFilter,
         page: _page,
       );
+      final list = result['list'] as List<Order>;
       if (refresh) {
         _orders = list;
       } else {
@@ -50,7 +51,7 @@ class OrderProvider extends ChangeNotifier {
   }
 
   /// 设置状态筛选
-  void setStatusFilter(String status) {
+  void setStatusFilter(int? status) {
     _statusFilter = status;
     loadOrders(refresh: true);
   }

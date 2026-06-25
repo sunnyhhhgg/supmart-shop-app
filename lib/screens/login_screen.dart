@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
+import 'register_screen.dart';
 import '../services/config_service.dart';
 import 'home_screen.dart';
 
@@ -120,6 +121,17 @@ class _LoginScreenState extends State<LoginScreen> {
                         ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                         : const Text('登  录', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                   ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text('还没有账号？', style: TextStyle(fontSize: 13, color: Colors.white.withOpacity(0.4))),
+                    TextButton(
+                      onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const RegisterScreen())),
+                      child: const Text('立即注册', style: TextStyle(fontSize: 13)),
+                    ),
+                  ],
                 ),
               ],
             ),

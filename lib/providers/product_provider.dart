@@ -9,15 +9,18 @@ class ProductProvider extends ChangeNotifier {
   int _selectedCategoryId = 0;
   bool _isLoading = false;
   String? _error;
+  String? _searchKeyword;
 
   List<Product> get products => _products;
   List<Category> get categories => _categories;
   int get selectedCategoryId => _selectedCategoryId;
   bool get isLoading => _isLoading;
   String? get error => _error;
+  String? get searchKeyword => _searchKeyword;
 
   /// 加载分类和商品
   Future<void> loadAll() async {
+    _searchKeyword = null;
     _isLoading = true;
     _error = null;
     notifyListeners();
@@ -38,6 +41,7 @@ class ProductProvider extends ChangeNotifier {
   /// 切换分类
   Future<void> selectCategory(int categoryId) async {
     _selectedCategoryId = categoryId;
+    _searchKeyword = null;
     _isLoading = true;
     _error = null;
     notifyListeners();
@@ -48,11 +52,33 @@ class ProductProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// 搜索商品
+  Future<void> searchProducts(String keyword) async {
+    _searchKeyword = keyword.isEmpty ? null : keyword;
+    _selectedCategoryId = 0;
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final result = await ApiService.getProducts(
+        keyword: keyword.isNotEmpty ? keyword : null,
+      );
+      _products = result['list'] as List<Product>;
+    } catch (e) {
+      _error = '搜索失败: $e';
+    }
+
+    _isLoading = false;
+    notifyListeners();
+  }
+
   Future<void> _loadCategories() async {
     _categories = await ApiService.getCategories();
   }
 
   Future<void> _loadProducts({int? categoryId}) async {
-    _products = await ApiService.getProducts(categoryId: categoryId);
+    final result = await ApiService.getProducts(categoryId: categoryId);
+    _products = result['list'] as List<Product>;
   }
 }

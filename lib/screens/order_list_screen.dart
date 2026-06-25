@@ -14,10 +14,10 @@ class OrderListScreen extends StatefulWidget {
 
 class _OrderListScreenState extends State<OrderListScreen> {
   final List<_StatusTab> _tabs = [
-    _StatusTab('全部', ''),
-    _StatusTab('待处理', '0'),
-    _StatusTab('已完成', '2'),
-    _StatusTab('已退款', '-1'),
+    _StatusTab('全部', null),
+    _StatusTab('待处理', 0),
+    _StatusTab('已完成', 2),
+    _StatusTab('已退款', -1),
   ];
 
   @override
@@ -213,6 +213,6 @@ class _OrderListScreenState extends State<OrderListScreen> {
 
 class _StatusTab {
   final String label;
-  final String status;
+  final int? status;
   const _StatusTab(this.label, this.status);
 }

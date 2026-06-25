@@ -74,7 +74,8 @@ class AuthProvider extends ChangeNotifier {
   Future<void> refreshBalance() async {
     if (!_isLoggedIn) return;
     try {
-      _balance = await ApiService.getBalance();
+      final profile = await ApiService.getProfile();
+      _balance = (profile['balance'] ?? 0).toDouble();
       notifyListeners();
     } catch (_) {}
   }
