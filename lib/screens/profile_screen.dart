@@ -227,15 +227,6 @@ class ProfileScreen extends StatelessWidget {
               child: _buildWalletAction(Icons.add_circle_outline, '充值', Colors.green),
             ),
           ),
-          Container(width: 1, height: 32, color: Colors.white.withOpacity(0.06)),
-          Expanded(
-            child: GestureDetector(
-              onTap: () => _toPage(context, WalletScreen(
-                key: ValueKey('wallet_withdraw_${DateTime.now().millisecondsSinceEpoch}'),
-              )),
-              child: _buildWalletAction(Icons.send, '提现', Colors.orange),
-            ),
-          ),
         ],
       ),
     );
